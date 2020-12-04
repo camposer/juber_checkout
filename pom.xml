@@ -8,6 +8,7 @@
 		<version>2.4.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.4geeks.juber</groupId>
 	<artifactId>checkout</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
