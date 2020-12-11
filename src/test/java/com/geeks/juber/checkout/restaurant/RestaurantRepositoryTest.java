@@ -1,6 +1,6 @@
 package com.geeks.juber.checkout.restaurant;
 
-import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +14,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.AFTER_METHOD;
 
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(methodMode = AFTER_METHOD)
-public class RestaurantEntityRepositoryTest {
+public class RestaurantRepositoryTest {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
@@ -71,11 +71,9 @@ public class RestaurantEntityRepositoryTest {
             assertFalse(actualRestaurants.get(1).isOpen());
         }
 
-        // @Test
-        // TODO change by skip
-        public void shouldReturnNullWhenTheListIsEmpty() {
-
-            assertNull(restaurantRepository.findAll());
+        @Test
+        public void shouldReturnAnEmptyListWhenThereAreNoRestaurants() {
+            assertEquals(0, restaurantRepository.findAll().size());
         }
     }
 
@@ -94,6 +92,65 @@ public class RestaurantEntityRepositoryTest {
             assertEquals("Name", actualRestaurant.getName());
             assertEquals("Address", actualRestaurant.getAddress());
             assertFalse(actualRestaurant.isOpen());
+        }
+    }
+
+    @Nested
+    class DeleteById {
+        @Test
+        public void shouldRemoveARestaurantById() {
+            // prepare
+            RestaurantEntity restaurant = new RestaurantEntity("Name", "Address");
+            RestaurantEntity actualRestaurant = restaurantRepository.save(restaurant);
+
+            // execute
+            restaurantRepository.deleteById(actualRestaurant.getId());
+
+            // assert
+            assertEquals(0, restaurantRepository.findAll().size());
+        }
+
+        @Test
+        public void shouldThrowWhenTheIdDoesntExist() {
+            Assertions.assertThrows(InvalidIdException.class, () -> {
+                restaurantRepository.deleteById(99L);
+            });
+        }
+    }
+
+    @Nested
+    class Update {
+        @Test
+        public void shouldUpdate() {
+            RestaurantEntity restaurant = new RestaurantEntity("Name", "Address");
+            RestaurantEntity newRestaurant = restaurantRepository.save(restaurant);
+
+            newRestaurant.setName("New Name");
+            newRestaurant.setAddress("New Address");
+            RestaurantEntity updatedRestaurant = restaurantRepository.update(newRestaurant);
+
+            assertEquals(1, restaurantRepository.findAll().size());
+            assertEquals("New Name", updatedRestaurant.getName());
+            assertEquals("New Address", updatedRestaurant.getAddress());
+        }
+
+        @Test
+        public void shouldThrowWhenTheRestaurantIdIsNull() {
+            RestaurantEntity restaurant = new RestaurantEntity("Name", "Address");
+
+            Assertions.assertThrows(RuntimeException.class, () -> {
+                restaurantRepository.update(restaurant);
+            });
+        }
+
+        @Test
+        public void shouldThrowWhenTheRestaurantDoesntExist() {
+            RestaurantEntity restaurant = new RestaurantEntity("Name", "Address");
+            restaurant.setId(99L);
+
+            Assertions.assertThrows(RuntimeException.class, () -> {
+                restaurantRepository.update(restaurant);
+            });
         }
     }
 

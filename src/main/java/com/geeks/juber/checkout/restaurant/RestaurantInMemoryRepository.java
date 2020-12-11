@@ -15,10 +15,10 @@ public class RestaurantInMemoryRepository implements RestaurantRepository {
         currentId = 0;
     }
 
-    @Override
+    @Override // FIXME What about the other fields?
     public RestaurantEntity save(RestaurantEntity restaurant) {
         RestaurantEntity newRestaurant =
-                new RestaurantEntity(restaurant.getName(), restaurant.getAddress());
+                new RestaurantEntity(restaurant.getName(), restaurant.getAddress()); // clone
         currentId++;
         newRestaurant.setId(currentId);
         this.restaurants.put(currentId, newRestaurant);
@@ -33,5 +33,19 @@ public class RestaurantInMemoryRepository implements RestaurantRepository {
     @Override
     public List<RestaurantEntity> findAll() {
         return new ArrayList<>(restaurants.values());
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        if (restaurants.get(id) == null) // guard clause
+            throw new InvalidIdException(String.format("There is no restaurant with id = %d", id));
+        restaurants.remove(id);
+    }
+
+    @Override
+    public RestaurantEntity update(RestaurantEntity restaurant) {
+        if (restaurant.getId() == null || restaurants.get(restaurant.getId()) == null)
+            throw new RuntimeException("Invalid ....");
+        return restaurants.put(restaurant.getId(), restaurant);
     }
 }

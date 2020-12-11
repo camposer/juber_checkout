@@ -8,4 +8,8 @@ public interface RestaurantRepository {
     RestaurantEntity findById(long id);
 
     List<RestaurantEntity> findAll();
+
+    void deleteById(Long id);
+
+    RestaurantEntity update(RestaurantEntity restaurant);
 }
